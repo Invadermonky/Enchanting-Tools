@@ -61,9 +61,12 @@ public class ItemObsidianBurnisher extends Item implements IAnvilSpecialBehavior
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
-        tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.label"));
-        tooltip.add(TextFormatting.GRAY + I18n.format(""));
-        tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.effect"));
-        tooltip.add(TextFormatting.BLUE + I18n.format("description.enchanter_tools.obsidian_burnisher.stats", Config.item.obsidianBurnisher.repairCostAltering));
+        if(Config.item.obsidianBurnisher.enableTooltip)
+        {
+            tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.label"));
+            tooltip.add(TextFormatting.GRAY + I18n.format(""));
+            tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.effect"));
+            tooltip.add(TextFormatting.BLUE + I18n.format("description.enchanter_tools.obsidian_burnisher.stats", Config.item.obsidianBurnisher.repairCostAltering));
+        }
     }
 }

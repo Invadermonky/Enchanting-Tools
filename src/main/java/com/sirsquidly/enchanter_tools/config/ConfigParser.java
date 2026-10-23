@@ -1,6 +1,9 @@
 package com.sirsquidly.enchanter_tools.config;
 
+import com.sirsquidly.enchanter_tools.common.RuneType;
+import com.sirsquidly.enchanter_tools.common.items.ItemLapisRune;
 import com.sirsquidly.enchanter_tools.enchanterTools;
+import com.sirsquidly.enchanter_tools.init.EnchanterToolsItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
@@ -8,14 +11,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.registries.GameData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 	This is to break part arrays in the config for use in other areas of the code.
@@ -27,42 +30,50 @@ public class ConfigParser
 	/** Goes through the many Arrays in the config, to translate them into lists to be used elsewhere. */
 	public static void breakupConfigArrays()
 	{
-		//Resetting all config caches
+		parseBookshelfConfigs();
+		parseBrazierConfigs();
+		parseExtractingBookConfigs();
+		parseEightBallConfigs();
+		parseInkwellConfigs();
+		parseComprehensionConfigs();
+	}
+
+	public static void parseBookshelfConfigs()
+	{
 		ConfigCache.bookshelfAcceptedBooks.clear();
 		ConfigCache.bookshelfAcceptedNames.clear();
-		ConfigCache.brazierBurnEnchantBlacklist.clear();
-		ConfigCache.brazierBurnItemBlacklist.clear();
-		ConfigCache.extractBookExtractEnchantBlacklist.clear();
-		ConfigCache.extractBookExtractItemBlacklist.clear();
-		ConfigCache.eightBallInjectChances.clear();
-		ConfigCache.eightBallInjectLootTables.clear();
-		ConfigCache.inkwellInjectChances.clear();
-		ConfigCache.inkwellInjectLootTables.clear();
-		ConfigCache.comprehensionEntityBlacklist.clear();
 
-		//Chiseled Bookshelf
+		if(!Config.block.chiseledBookshelf.enable) return;
+
 		for(String S : Config.block.chiseledBookshelf.acceptedBooks)
 		{
 			ItemStack book = getItemStackFromString(S);
 
 			if (book == ItemStack.EMPTY)
 			{
-                enchanterTools.LOGGER.error("Chiseled Bookshelf accepted book {} was not found, skipping...", S);
+				enchanterTools.LOGGER.error("Chiseled Bookshelf accepted book {} was not found, skipping...", S);
 				continue;
 			}
 
 			ConfigCache.bookshelfAcceptedBooks.add(book);
 		}
 		ConfigCache.bookshelfAcceptedNames.addAll(Arrays.asList(Config.block.chiseledBookshelf.acceptedNames));
+	}
 
-		//Arcane Brazier
+	public static void parseBrazierConfigs()
+	{
+		ConfigCache.brazierBurnEnchantBlacklist.clear();
+		ConfigCache.brazierBurnItemBlacklist.clear();
+
+		if(!Config.block.arcaneBrazier.enable) return;
+
 		for(String S : Config.block.arcaneBrazier.burningEnchantBlacklist)
 		{
 			Enchantment enchant = getEnchantmentFromString(S);
 
 			if (enchant == null)
 			{
-                enchanterTools.LOGGER.error("Chiseled Bookshelf blacklisted enchant {} was not found, skipping...", S);
+				enchanterTools.LOGGER.error("Chiseled Bookshelf blacklisted enchant {} was not found, skipping...", S);
 				continue;
 			}
 			ConfigCache.brazierBurnEnchantBlacklist.add(S);
@@ -71,13 +82,21 @@ public class ConfigParser
 		{
 			ItemStack stack = getItemStackFromString(S);
 
-			if (stack == null)
+			if (stack.isEmpty())
 			{
-                enchanterTools.LOGGER.error("Arcane Brazier blacklisted item {} was not found, skipping...", S);
+				enchanterTools.LOGGER.error("Arcane Brazier blacklisted item {} was not found, skipping...", S);
 				continue;
 			}
 			ConfigCache.brazierBurnItemBlacklist.add(stack);
 		}
+	}
+
+	public static void parseExtractingBookConfigs()
+	{
+		ConfigCache.extractBookExtractEnchantBlacklist.clear();
+		ConfigCache.extractBookExtractItemBlacklist.clear();
+
+		if(!Config.item.extractingBook.enable) return;
 
 		for(String S : Config.item.extractingBook.extractEnchantBlacklist)
 		{
@@ -85,7 +104,7 @@ public class ConfigParser
 
 			if (enchant == null)
 			{
-                enchanterTools.LOGGER.error("Extracting Book blacklisted enchant {} was not found, skipping...", S);
+				enchanterTools.LOGGER.error("Extracting Book blacklisted enchant {} was not found, skipping...", S);
 				continue;
 			}
 			ConfigCache.extractBookExtractEnchantBlacklist.add(S);
@@ -94,51 +113,154 @@ public class ConfigParser
 		{
 			ItemStack stack = getItemStackFromString(S);
 
-			if (stack == null)
+			if (stack.isEmpty())
 			{
-                enchanterTools.LOGGER.error("Extracting Book blacklisted item {} was not found, skipping...", S);
+				enchanterTools.LOGGER.error("Extracting Book blacklisted item {} was not found, skipping...", S);
 				continue;
 			}
 
 			ConfigCache.extractBookExtractItemBlacklist.add(stack);
 		}
+	}
+
+	public static void parseEightBallConfigs()
+	{
+		ConfigCache.eightBallInjectChances.clear();
+		ConfigCache.eightBallInjectLootTables.clear();
+
+		if(!Config.item.enchantedEightBall.enable) return;
+
 		for(String S : Config.item.enchantedEightBall.eight_ball_lootTables)
 		{
 			String[] split = S.split("=");
 
 			if (split.length != 2)
 			{
-                enchanterTools.LOGGER.error("Enchanted 8 Ball loot table entry {} is improperly written! Did you use a '=' properly?", S);
+				enchanterTools.LOGGER.error("Enchanted 8 Ball loot table entry {} is improperly written! Did you use a '=' properly?", S);
 				continue;
 			}
 
 			ConfigCache.eightBallInjectLootTables.add(new ResourceLocation(split[0]));
-			ConfigCache.eightBallInjectChances.add(Float.valueOf(split[1]));
+			ConfigCache.eightBallInjectChances.add(getFloatFromString(split[1], 0.02f));
 		}
-		/* Split the Inkwell Loot Table Injections up*/
+	}
+
+	public static void parseInkwellConfigs()
+	{
+		ConfigCache.inkwellInjectChances.clear();
+		ConfigCache.inkwellInjectLootTables.clear();
+
+		if(!Config.item.inkwell.enable) return;
+
 		for(String S : Config.item.inkwell.inkwell_lootTables)
 		{
 			String[] split = S.split("=");
 
 			if (split.length != 2)
 			{
-                enchanterTools.LOGGER.error("Enchanted Inkwell loot table entry {} is improperly written! Did you use a '=' properly?", S);
+				enchanterTools.LOGGER.error("Enchanted Inkwell loot table entry {} is improperly written! Did you use a '=' properly?", S);
 				continue;
 			}
 
 			ConfigCache.inkwellInjectLootTables.add(new ResourceLocation(split[0]));
-			ConfigCache.inkwellInjectChances.add(Float.valueOf(split[1]));
+			ConfigCache.inkwellInjectChances.add(getFloatFromString(split[1], 0.001f));
 		}
+	}
+
+	public static void parseComprehensionConfigs()
+	{
+		ConfigCache.comprehensionEntityBlacklist.clear();
+
+		if(!Config.potionEffects.comprehension.enable) return;
 
 		for(String S : Config.potionEffects.comprehension.entityBlacklist)
 		{
 			ResourceLocation entityResourceloc = getEntityFromString(S);
 			if (entityResourceloc == null)
 			{
-                enchanterTools.LOGGER.error("Comprehension effect entity {} is returning null, is the entity ID written properly/does it exist? Skipping...", S);
+				enchanterTools.LOGGER.error("Comprehension effect entity {} is returning null, is the entity ID written properly/does it exist? Skipping...", S);
 				continue;
 			}
 			ConfigCache.comprehensionEntityBlacklist.add(entityResourceloc);
+		}
+	}
+
+	public static Set<RuneType> parseLapisRuneConfigs()
+	{
+		Set<RuneType> types = new LinkedHashSet<>(Config.item.lapisRune.runeTypes.length);
+		Pattern pattern	= Pattern.compile("^([^-]+)-(.+)$");
+		for(String str : Config.item.lapisRune.runeTypes)
+		{
+			Matcher matcher = pattern.matcher(str);
+			if(matcher.find())
+			{
+				types.add(new RuneType(matcher.group(1), matcher.group(2)));
+			}
+			else
+			{
+				enchanterTools.LOGGER.error("Invalid lapis rune configuration string: {}", str);
+			}
+		}
+		return types;
+	}
+
+	/**
+	 * This method should only be called after the lapis rune items are registered. It attempts to update
+	 * configuration data for runes that have already been loaded previously.
+	 *
+	 * Pretty much allows configuration reloading for existing lapis runes.
+	 */
+	public static void reloadLapisRuneConfigs()
+	{
+        for (RuneType type : parseLapisRuneConfigs())
+		{
+            for (ItemLapisRune runeItem : EnchanterToolsItems.LAPIS_RUNES)
+			{
+                if (runeItem.getRuneType().getName().equals(type.getName()))
+				{
+                    runeItem.getRuneType().setConfigStr(type.getConfigStr());
+                    runeItem.getRuneType().init();
+                    break;
+                }
+            }
+        }
+    }
+
+	public static void parseAndLoadRuneConfig(RuneType type)
+	{
+		type.setDefaultValues();
+		String[] split = type.getConfigStr().split("-");
+		//Mimic Item
+		if(split.length >= 1) type.setMimicItem(getItemStackFromString(split[0]));
+		//Level Requirement Multiplier
+		if(split.length >= 2) type.setLevelRequirementMult(getFloatFromString(split[1], 1.0f));
+		//Cost Multiplier
+		if(split.length >= 3) type.setCostMult(getFloatFromString(split[2], 1.0f));
+		//Enchantment Whitelist
+		if(split.length >= 4)
+		{
+			String[] whitelistSplit = split[3].split(";");
+			for(String str : whitelistSplit)
+			{
+				Enchantment enchantment = ConfigParser.getEnchantmentFromString(str);
+				if(enchantment != null)
+				{
+					type.getEnchantmentWhitelist().add(enchantment);
+				}
+			}
+		}
+		//Enchantment Blacklist
+		if(split.length >= 5)
+		{
+			String[] blacklistSplit = split[4].split(";");
+			for(String str : blacklistSplit)
+			{
+				Enchantment enchantment = ConfigParser.getEnchantmentFromString(str);
+				if(enchantment != null)
+				{
+					type.getEnchantmentBlacklist().add(enchantment);
+				}
+			}
 		}
 	}
 
@@ -166,13 +288,24 @@ public class ConfigParser
 		return false;
 	}
 
+	public static float getFloatFromString(String str, float defaultValue) {
+		try
+		{
+			return !str.isEmpty() ? Float.parseFloat(str) : defaultValue;
+		}
+		catch (Exception ignored)
+		{
+			return defaultValue;
+		}
+	}
+
 	public static ItemStack getItemStackFromString(String string)
 	{
 		String[] ripString = string.split(":");
 
 		if (ripString.length < 2) return ItemStack.EMPTY;
 
-		Item item = GameRegistry.findRegistry(Item.class).getValue(new ResourceLocation(ripString[0], ripString[1]));
+		Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(ripString[0], ripString[1]));
 		if(item == null) return ItemStack.EMPTY;
 
 		int meta = OreDictionary.WILDCARD_VALUE;

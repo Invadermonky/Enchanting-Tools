@@ -61,17 +61,18 @@ public class TilePonderingOrb extends TileEntity implements ITickable
 
     public boolean playerIsPonderingOrb(EntityPlayer player)
     {
+        //Add pondering experience cap
+        int cap = Config.block.ponderingOrb.ponderingLevelCap;
+        if(cap > 0 && cap <= player.experienceLevel) return false;
+
         if(!Config.block.ponderingOrb.ponderingRequiresLook) return true;
 
         Vec3d eyePosition = player.getPositionEyes(1.0F);
         Vec3d lookVector = player.getLook(1.0F);
         double playerReach = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue();
         Vec3d traceEnd = eyePosition.add(lookVector.x * playerReach, lookVector.y * playerReach, lookVector.z * playerReach);
-
         RayTraceResult rtresult = player.getEntityWorld().rayTraceBlocks(eyePosition, traceEnd, false, true, false);;
 
-        if (rtresult == null) return false;
-        if (rtresult.typeOfHit == RayTraceResult.Type.BLOCK) return rtresult.getBlockPos().equals(this.getPos());
-        return false;
+        return rtresult != null && rtresult.typeOfHit == RayTraceResult.Type.BLOCK && rtresult.getBlockPos().equals(this.getPos());
     }
 }

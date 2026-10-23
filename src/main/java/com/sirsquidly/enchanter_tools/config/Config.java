@@ -137,6 +137,11 @@ public class Config
             @net.minecraftforge.common.config.Config.RangeInt(min = 0, max = 10000)
             public int ponderingExperience = 1;
 
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.block.pondering_orb.ponderingLevelCap")
+            @net.minecraftforge.common.config.Config.Comment("The maximum level that can be obtained by pondering. Players over this level will not receive experience. A value of 0 will disable this cap.")
+            @net.minecraftforge.common.config.Config.RangeInt(min = 0, max = 100)
+            public int ponderingLevelCap = 30;
+
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.block.pondering_orb.ponderingRange")
             @net.minecraftforge.common.config.Config.Comment("The maximum distance from the pondering orb the player can be to receive free XP.")
             @net.minecraftforge.common.config.Config.RangeInt(min = 0, max = 16)
@@ -179,6 +184,10 @@ public class Config
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.extractingBook.enable")
             @net.minecraftforge.common.config.Config.Comment("Enable the Extracting Book.")
             public boolean enable = true;
+
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enableTooltip")
+            @net.minecraftforge.common.config.Config.Comment("Set to false to disable the Extracting Book information tooltip.")
+            public boolean enableTooltip = true;
 
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.extractingBook.extractEnchantBlacklist")
             @net.minecraftforge.common.config.Config.Comment("A list of enchantments that cannot be extracted via the Extracting Book.")
@@ -235,6 +244,10 @@ public class Config
             @net.minecraftforge.common.config.Config.Comment("Enable the Enchanted Inkwell.")
             public boolean enable = true;
 
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enableTooltip")
+            @net.minecraftforge.common.config.Config.Comment("Set to false to disable the Enchanted Inkwell information tooltip.")
+            public boolean enableTooltip = true;
+
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enchantedInkwell.inkwell_lootTables")
             @net.minecraftforge.common.config.Config.Comment("Loot Tables the Enchanted Inkwell will be injected into. Non-replacing.")
             public String[] inkwell_lootTables =
@@ -272,6 +285,19 @@ public class Config
 
         public static class configLapisRune
         {
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enableTooltip")
+            @net.minecraftforge.common.config.Config.Comment("Set to false to disable the Lapis Rune information tooltip.")
+            public boolean enableTooltip = true;
+
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enchantmentTooltips")
+            @net.minecraftforge.common.config.Config.Comment({
+                    "Enables the enchantment whitelist/blacklist tooltip information.",
+                    " DISABLED: The tooltip will not be shown",
+                    " ENABLED: The tooltip will always be shown",
+                    " SHIFT: The tooltip will display when the shift key is held"
+            })
+            public TooltipType enchantmentTooltips = TooltipType.DISABLED;
+
             @net.minecraftforge.common.config.Config.RequiresMcRestart
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.lapisRune.runeTypes")
             @net.minecraftforge.common.config.Config.Comment({
@@ -296,6 +322,12 @@ public class Config
                     "pickaxe-minecraft:golden_pickaxe--1.21.5",
                     "sword-minecraft:golden_sword-1.2-1.5",
                     "arbitrary_example---1-minecraft:efficiency;minecraft:fortune-minecraft:silk_touch"};
+
+            public enum TooltipType {
+                DISABLED,
+                ENABLED,
+                SHIFT;
+            }
         }
 
         @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.obsidianBurnisher")
@@ -308,6 +340,10 @@ public class Config
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.obsidianBurnisher.enable")
             @net.minecraftforge.common.config.Config.Comment("Enable the Obsidian Burnisher.")
             public boolean enable = true;
+
+            @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.enableTooltip")
+            @net.minecraftforge.common.config.Config.Comment("Set to false to disable the Obsidian Burnisher information tooltip.")
+            public boolean enableTooltip = true;
 
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.obsidianBurnisher.durabilityCost")
             @net.minecraftforge.common.config.Config.Comment("How much Durability the targeted item loses when the Burnisher is used on it. Converted to a percent of the item's Max Durability. ")
@@ -322,10 +358,10 @@ public class Config
             @net.minecraftforge.common.config.Config.LangKey("config.enchanter_tools.item.obsidianBurnisher.tooltipVisibility")
             @net.minecraftforge.common.config.Config.Comment({
                     "Determines when the 'Anvil Uses' tooltip will appear on valid items while the obsidian Burnisher is in the player's inventory.",
-                    "ALWAYS: The tooltip will always display",
-                    "SHIFT: The tooltip will only display when the shift key is held",
-                    "ANVIL: The tooltip will only display when ",
-                    "DISABLED: The tooltip will never display"
+                    " ALWAYS: The tooltip will always display",
+                    " SHIFT: The tooltip will only display when the shift key is held",
+                    " ANVIL: The tooltip will only display when the player has the anvil gui open",
+                    " DISABLED: The tooltip will never display"
             })
             public TooltipVisibility tooltipVisibility = TooltipVisibility.SHIFT;
 
@@ -383,6 +419,7 @@ public class Config
             {
                 ConfigManager.sync(enchanterTools.MOD_ID, net.minecraftforge.common.config.Config.Type.INSTANCE);
                 ConfigParser.breakupConfigArrays();
+                ConfigParser.reloadLapisRuneConfigs();
             }
         }
     }

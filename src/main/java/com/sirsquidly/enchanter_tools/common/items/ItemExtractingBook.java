@@ -1,6 +1,7 @@
 package com.sirsquidly.enchanter_tools.common.items;
 
 import com.sirsquidly.enchanter_tools.common.CommonEvents;
+import com.sirsquidly.enchanter_tools.config.Config;
 import com.sirsquidly.enchanter_tools.config.ConfigCache;
 import com.sirsquidly.enchanter_tools.config.ConfigParser;
 import net.minecraft.client.resources.I18n;
@@ -108,9 +109,11 @@ public class ItemExtractingBook extends Item implements IAnvilSpecialBehavior
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
-        tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.label"));
-        tooltip.add("");
-        tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.applies"));
-        tooltip.add(TextFormatting.BLUE + I18n.format("description.enchanter_tools.anvil_ingredient.enchanted_items"));
+        if (Config.item.extractingBook.enableTooltip) {
+            tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.label"));
+            tooltip.add("");
+            tooltip.add(TextFormatting.GRAY + I18n.format("description.enchanter_tools.anvil_ingredient.applies"));
+            tooltip.add(TextFormatting.BLUE + I18n.format("description.enchanter_tools.anvil_ingredient.enchanted_items"));
+        }
     }
 }

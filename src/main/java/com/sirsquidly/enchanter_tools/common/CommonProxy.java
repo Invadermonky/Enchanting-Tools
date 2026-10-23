@@ -6,6 +6,7 @@ import com.sirsquidly.enchanter_tools.common.blocks.tileentity.TileChiseledBooks
 import com.sirsquidly.enchanter_tools.common.blocks.tileentity.TilePonderingOrb;
 import com.sirsquidly.enchanter_tools.config.ConfigParser;
 import com.sirsquidly.enchanter_tools.enchanterTools;
+import com.sirsquidly.enchanter_tools.init.EnchanterToolsItems;
 import com.sirsquidly.enchanter_tools.init.EnchanterToolsSounds;
 import com.sirsquidly.enchanter_tools.network.enchanterToolsPacketHandler;
 import com.sirsquidly.enchanter_tools.network.enchanterToolsPacketSpawnParticles;
@@ -34,7 +35,10 @@ public class CommonProxy
     public void initRegisteries(FMLInitializationEvent event) {}
 
     public void postInitRegisteries(FMLPostInitializationEvent event)
-    { ConfigParser.breakupConfigArrays(); }
+    {
+        ConfigParser.breakupConfigArrays();
+        EnchanterToolsItems.LAPIS_RUNES.forEach(item -> item.getRuneType().init());
+    }
 
     @SideOnly(Side.CLIENT)
     public void registerItemRenderer(Item item, int meta, String id) {}

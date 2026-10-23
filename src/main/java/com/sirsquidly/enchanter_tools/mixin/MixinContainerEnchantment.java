@@ -1,6 +1,7 @@
 package com.sirsquidly.enchanter_tools.mixin;
 
 import com.sirsquidly.enchanter_tools.common.RuneEnchantmentLogic;
+import com.sirsquidly.enchanter_tools.common.RuneType;
 import com.sirsquidly.enchanter_tools.common.items.ItemLapisRune;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.Enchantment;
@@ -29,7 +30,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @Mixin(ContainerEnchantment.class)
 public abstract class MixinContainerEnchantment
@@ -48,7 +52,7 @@ public abstract class MixinContainerEnchantment
     @Final private IInventory tableInventory;
 
     private List<EnchantmentData>[] cachedRunePools = new List[3];
-    private ItemLapisRune.RuneType storedRune;
+    private RuneType storedRune;
 
     @Inject(method = "onCraftMatrixChanged", at = @At("RETURN"))
     private void enchantertools$fixPreview(IInventory inv, CallbackInfo ci)
@@ -64,7 +68,7 @@ public abstract class MixinContainerEnchantment
             return;
         }
 
-        ItemLapisRune.RuneType rune = ((ItemLapisRune) runeStack.getItem()).getRuneType();
+        RuneType rune = ((ItemLapisRune) runeStack.getItem()).getRuneType();
         this.storedRune = rune;
 
         for (int i = 0; i < 3; i++)

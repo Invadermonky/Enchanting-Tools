@@ -4,8 +4,10 @@ import com.sirsquidly.enchanter_tools.init.EnchanterToolsBlocks;
 import com.sirsquidly.enchanter_tools.init.EnchanterToolsItems;
 import mezz.jei.api.*;
 import mezz.jei.api.ingredients.VanillaTypes;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @JEIPlugin
 public class CompatJEI implements IModPlugin
@@ -26,10 +28,8 @@ public class CompatJEI implements IModPlugin
         registry.addIngredientInfo(new ItemStack(EnchanterToolsItems.ENCHANTED_INKWELL), VanillaTypes.ITEM, "jei.enchanter_tools.enchanted_inkwell.desc");
         registry.addIngredientInfo(new ItemStack(EnchanterToolsItems.EXTRACTING_BOOK), VanillaTypes.ITEM, "jei.enchanter_tools.extracting_book.desc");
         /* Holy shit I expected this to be WAY worse! */
-        for (Item rune : EnchanterToolsItems.LAPIS_RUNES.values())
-        {
-            registry.addIngredientInfo(new ItemStack(rune), VanillaTypes.ITEM, "jei.enchanter_tools.lapis_rune.desc");
-        }
+        List<ItemStack> runeStacks = EnchanterToolsItems.LAPIS_RUNES.stream().map(ItemStack::new).collect(Collectors.toList());
+        registry.addIngredientInfo(runeStacks, VanillaTypes.ITEM, "jei.enchanter_tools.lapis_rune.desc");
         registry.addIngredientInfo(new ItemStack(EnchanterToolsBlocks.PONDERING_ORB), VanillaTypes.ITEM, "jei.enchanter_tools.pondering_orb.desc");
     }
 }

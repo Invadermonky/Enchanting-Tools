@@ -1,7 +1,9 @@
 package com.sirsquidly.enchanter_tools.init;
 
+import com.sirsquidly.enchanter_tools.common.RuneType;
 import com.sirsquidly.enchanter_tools.common.items.*;
 import com.sirsquidly.enchanter_tools.config.Config;
+import com.sirsquidly.enchanter_tools.config.ConfigParser;
 import com.sirsquidly.enchanter_tools.enchanterTools;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -14,7 +16,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = enchanterTools.MOD_ID)
@@ -27,7 +28,7 @@ public class EnchanterToolsItems
     public static Item ENCHANTED_EIGHT_BALL = new ItemEnchanted8Ball().setCreativeTab(CreativeTabs.MISC);
     public static Item OBSIDIAN_BURNISHER = new ItemObsidianBurnisher().setCreativeTab(CreativeTabs.TOOLS);
 
-    public static LinkedHashMap<ItemLapisRune.RuneType, ItemLapisRune> LAPIS_RUNES = new LinkedHashMap<>();
+    public static List<ItemLapisRune> LAPIS_RUNES = new ArrayList<>();
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event)
@@ -37,17 +38,15 @@ public class EnchanterToolsItems
         if (Config.item.inkwell.enable) itemReadyForRegister(ENCHANTED_INKWELL, "enchanted_inkwell");
         if (Config.item.obsidianBurnisher.enable) itemReadyForRegister(OBSIDIAN_BURNISHER, "obsidian_burnisher");
 
-        ItemLapisRune.RuneType.readFromConfig();
-        ItemLapisRune.RuneType.getAll().forEach(type ->
+        for(RuneType type : ConfigParser.parseLapisRuneConfigs())
         {
-            ItemLapisRune rune = (ItemLapisRune)itemReadyForRegister(new ItemLapisRune(type), type.getName() + "_lapis_rune");
-            LAPIS_RUNES.put(type, rune);
-        });
+            LAPIS_RUNES.add((ItemLapisRune) itemReadyForRegister(new ItemLapisRune(type), type.getRegistryName()));
+        }
 
         for (Item items : itemList) event.getRegistry().register(items);
 
         /* Yes, all the runes are still considered Lapis. This allows them into the lapis slot of the Enchanting Table. */
-        LAPIS_RUNES.values().forEach(rune -> { OreDictionary.registerOre("gemLapis", rune);});
+        LAPIS_RUNES.forEach(rune -> OreDictionary.registerOre("gemLapis", rune));
     }
 
     public static Item itemReadyForRegister(Item item, String name)

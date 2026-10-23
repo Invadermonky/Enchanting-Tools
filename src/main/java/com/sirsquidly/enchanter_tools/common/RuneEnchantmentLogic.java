@@ -2,7 +2,6 @@ package com.sirsquidly.enchanter_tools.common;
 
 import com.sirsquidly.enchanter_tools.common.blocks.BlockArcaneBrazier;
 import com.sirsquidly.enchanter_tools.common.blocks.tileentity.TileArcaneBrazier;
-import com.sirsquidly.enchanter_tools.common.items.ItemLapisRune;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
@@ -13,7 +12,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public final class RuneEnchantmentLogic
@@ -21,7 +19,7 @@ public final class RuneEnchantmentLogic
     /** Generates the enchantments pool.
      *
      * Note: By Default. Target Item is just a Book. */
-    public static List<EnchantmentData> buildRunePool(ItemLapisRune.RuneType runeType, ItemStack targetItem, int power, boolean treasureAllowed, Random rand, Set<ResourceLocation> filter)
+    public static List<EnchantmentData> buildRunePool(RuneType runeType, ItemStack targetItem, int power, boolean treasureAllowed, Random rand, Set<ResourceLocation> filter)
     {
         List<EnchantmentData> pool = new ArrayList<>(), out = new ArrayList<>();
 
@@ -54,13 +52,13 @@ public final class RuneEnchantmentLogic
     }
 
     /** Generates the list of every enchantment this Rune can give. */
-    public static Set<Enchantment> buildAllowedSet(ItemLapisRune.RuneType runeType, ItemStack item, boolean isMimikedTreasureAllowed)
+    public static Set<Enchantment> buildAllowedSet(RuneType runeType, ItemStack item, boolean isMimikedTreasureAllowed)
     {
         Set<Enchantment> allowed = new LinkedHashSet<>();
 
-        if (runeType.getMimicItem() != null)
+        if (!runeType.getMimicItem().isEmpty())
         {
-            ItemStack mimic = new ItemStack(runeType.getMimicItem());
+            ItemStack mimic = runeType.getMimicItem();
 
             for (Enchantment e : Enchantment.REGISTRY)
             {
@@ -75,14 +73,16 @@ public final class RuneEnchantmentLogic
         * SORT the enchants so only COMPATIBLE ones are added to the item!
         * Also, no filtering for Enchanting Table check nor treasure, the whitelist is followed exactly
         * */
-        for (Enchantment e : runeType.getEnchantmentsWhitelist())
+        for (Enchantment e : runeType.getEnchantmentWhitelist())
         {
             if (e == null) continue;
-            if (e.canApply(item) || item.getItem() == Items.BOOK) allowed.add(e);
+            if (e.canApply(item) || (item.getItem() == Items.BOOK && e.isAllowedOnBooks())) {
+                allowed.add(e);
+            }
         }
 
         /* Simply dump any blacklisted enchantments. No fancy filters needed! */
-        allowed.removeAll(runeType.getEnchantmentsBlacklist());
+        allowed.removeAll(runeType.getEnchantmentBlacklist());
 
         return allowed;
     }
