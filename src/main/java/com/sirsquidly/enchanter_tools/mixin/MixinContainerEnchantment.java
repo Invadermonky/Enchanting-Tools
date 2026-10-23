@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -22,11 +23,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -36,7 +39,7 @@ import java.util.Random;
 import java.util.Set;
 
 @Mixin(ContainerEnchantment.class)
-public abstract class MixinContainerEnchantment
+public abstract class MixinContainerEnchantment extends Container
 {
     @Shadow @Final private World world;
     @Shadow @Final private BlockPos position;
@@ -53,6 +56,31 @@ public abstract class MixinContainerEnchantment
 
     private List<EnchantmentData>[] cachedRunePools = new List[3];
     private RuneType storedRune;
+
+    @Redirect(
+            method = "Lnet/minecraft/inventory/ContainerEnchantment;<init>(Lnet/minecraft/entity/player/InventoryPlayer;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/inventory/ContainerEnchantment;addSlotToContainer(Lnet/minecraft/inventory/Slot;)Lnet/minecraft/inventory/Slot;",
+                    ordinal = 1
+            )
+    )
+    private Slot enchantertools$allowLapisRuneInSlot(ContainerEnchantment instance, Slot original) {
+        return this.addSlotToContainer(new Slot(this.tableInventory, original.getSlotIndex(), original.xPos, original.yPos) {
+            List<ItemStack> ores = OreDictionary.getOres("gemLapis");
+
+            @Override
+            public boolean isItemValid(ItemStack stack) {
+                if(stack.getItem() instanceof ItemLapisRune)
+                    return true;
+                for(ItemStack ore : ores) {
+                    if(OreDictionary.itemMatches(ore, stack, false))
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
 
     @Inject(method = "onCraftMatrixChanged", at = @At("RETURN"))
     private void enchantertools$fixPreview(IInventory inv, CallbackInfo ci)

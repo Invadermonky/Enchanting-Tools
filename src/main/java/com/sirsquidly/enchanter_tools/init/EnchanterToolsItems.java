@@ -13,7 +13,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +43,6 @@ public class EnchanterToolsItems
         }
 
         for (Item items : itemList) event.getRegistry().register(items);
-
-        /* Yes, all the runes are still considered Lapis. This allows them into the lapis slot of the Enchanting Table. */
-        LAPIS_RUNES.forEach(rune -> OreDictionary.registerOre("gemLapis", rune));
     }
 
     public static Item itemReadyForRegister(Item item, String name)
